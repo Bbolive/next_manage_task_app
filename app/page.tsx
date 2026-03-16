@@ -13,7 +13,7 @@ export default function Page() {
  
   const handleAsscessClick = () => {
     // ตรวจสอบรหัสที่ป้อนเข้ามา
-    if (securecode.toLowerCase() !== "sauiot") {
+    if (securecode.toLowerCase() !== "iotsau2026") {
       Swal.fire({
         icon: "error",
         title: "คำเตือน",
@@ -57,7 +57,7 @@ export default function Page() {
           onClick={handleAsscessClick}
           className="mt-5 w-1/2 bg-blue-600 py-3 text-white rounded hover:bg-blue-700 cursor-pointer"
         >
-          เข้าใช้งาน 😒
+          เข้าใช้งาน
         </button>
       </div>
  
