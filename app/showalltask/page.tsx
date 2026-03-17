@@ -53,7 +53,53 @@ export default function Page() {
     //เรียกใช้ฟัง์ชันดึงข้อมูล
     fetchTasks();
   }, []);
- 
+
+  // delete function
+  const handleDeleteClick = async (id: string, image_url: string) => {
+  //ยืนยันการลบข้อมูล
+  Swal.fire({
+    title: "ยืนยันการลบข้อมูล",
+    text: "คุณต้องการลบข้อมูลนี้หรือไม่?",
+    icon: "question",
+    confirmButtonText: "ยืนยัน",
+    showCancelButton: true,
+    cancelButtonText: "ยกเลิก"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      // ลบข้อมูลใน database
+      const { error: error1} = await supabase
+        .from("task_tb")
+        .delete()
+        .eq("id", id);
+
+      if (error1) {
+        Swal.fire({
+          title: "เกิดข้อผิดพลาด",
+          text: "ไม่สามารถลบข้อมูลในฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง",
+          icon: "error"
+        });
+        return;
+      }
+
+
+      // ลบรูปจาก storage
+      const {error: error2} = await supabase.storage
+        .from("task_bk")
+        .remove([image_url.substring(image_url.lastIndexOf("/") + 1)]);
+
+      if (error2) {
+        Swal.fire({
+          title: "เกิดข้อผิดพลาด", text: "ไม่สามารถลบรูปจาก storage ได้ กรุณาลองใหม่อีกครั้ง", icon: "error"
+        });
+        return;
+      }
+
+      // อัปเดตข้อมูลในตาราง
+      setTasks(tasks.filter((task) => task.id !== id));
+      }
+  })
+}
+
   return (
     <>
       <div
@@ -112,7 +158,15 @@ export default function Page() {
                   {new Date(item.update_at).toLocaleString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </td>
                 <td className="border border-gray-500 p-2 text-center">
-                    แก้ไข|ลบ
+                  <Link href={`/edittask/${item.id}`} className="text-green-500 hover:underline">
+                    แก้ไข
+                  </Link>
+                  {''} | {''}
+                  <button className="cursor-pointer text-red-500 hover:underline"
+                  onClick={() => handleDeleteClick(item.id, item.image_url)}
+                  >
+                    ลบ
+                  </button>
                 </td>
               </tr>
             ))}
